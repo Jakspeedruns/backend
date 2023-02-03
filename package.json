@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20230115.0",
+    "@types/compression": "^1.7.2",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.11.18",
+    "@types/uuid": "^8.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "better-sqlite3": "7.6.2",
+    "eslint": "^8.2.0",
+    "prettier": "2.4.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.9.5",
+    "vitest": "^0.28.3",
+    "wrangler": "2.9.0"
+  },
+  "private": true,
+  "scripts": {
+    "setup-db": "node ./db/run-migrations.mjs",
+    "start": "wrangler dev --local --persist",
+    "deploy": "wrangler publish",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "itty-router": "^3.0.11"
+  }
+}
