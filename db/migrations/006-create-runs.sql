@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS Runs(
+    RunId          INTEGER PRIMARY KEY,
+    SRId           TEXT UNIQUE,
+    GameId         INTEGER REFERENCES Games(GameId),
+    CatId          INTEGER REFERENCES Category(CatId),
+    Time           TEXT,
+    TimeSecs       REAL,
+    PlatformId     INTEGER REFERENCES Platform(PlatformId),
+    Emulated       INTEGER,
+    RegionId       TEXT REFERENCES Region(RegionId),
+    VideoLink      TEXT,
+    Comment        TEXT,
+    SubmitDate     TEXT,
+    Status         TEXT,
+    Examiner       TEXT,
+    VerifyDate     TEXT,
+    RowCreatedDate TEXT,
+    AlgPoint       INTEGER,
+    Variables      TEXT
+    );
