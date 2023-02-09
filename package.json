@@ -10,7 +10,7 @@
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",
-    "better-sqlite3": "7.6.2",
+    "better-sqlite3": "8.0.1",
     "eslint": "^8.2.0",
     "prettier": "2.4.1",
     "ts-node": "^10.4.0",
