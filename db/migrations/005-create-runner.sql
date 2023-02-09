@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS Runner(
         SRId            TEXT UNIQUE,
         Name            TEXT,
         Guest           INTEGER,
+        DiscordUser     TEXT,
         Twitch          TEXT,
         RowCreatedDate  TEXT,
         Image           TEXT

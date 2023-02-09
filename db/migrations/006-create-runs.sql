@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Runs(
-    RunId          INTEGER,
+    RunId          INTEGER PRIMARY KEY,
     SRId           TEXT UNIQUE,
     GameId         INTEGER REFERENCES Games(GameId),
     CatId          INTEGER REFERENCES Category(CatId),
@@ -16,6 +16,5 @@ CREATE TABLE IF NOT EXISTS Runs(
     VerifyDate     TEXT,
     RowCreatedDate TEXT,
     AlgPoint       INTEGER,
-    Variables      TEXT,
-    PRIMARY KEY (`RunId`)
+    Variables      TEXT
     );

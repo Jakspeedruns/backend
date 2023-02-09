@@ -39,7 +39,7 @@ INSERT INTO Category(SRId, CatName, GameID, IL)
               ('xk99ngk0', 'Hero Mode No SPS', 'm9dogm6p', 0),
               ('z279ood0', '101%', 'm9dogm6p', 0),
               ('jdrqz0k6', '100%', 'm9dogm6p', 0),
-              ('zdnx3y92', 'Jak 1', 'kdkz25qd', 0),    --Maybe I should use 'Jak 1 - Categories' 6njqpm5l
+              ('zdnx3y92', 'Jak 1', 'kdkz25qd', 0),    --6njqpm5l
               ('q253p1vk', 'Jak 2', 'kdkz25qd', 0),    --kn0zey08
               ('jdre0n5k', 'Jak 3', 'kdkz25qd', 0),    --ql649vw8
               ('jdz74ngk', 'Jak X', 'kdkz25qd', 0),    --ylpmkpjl

@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS Region;
 
 CREATE TABLE IF NOT EXISTS Region(
-        RegionId      TEXT PRIMARY KEY,
+        RegionId      INTEGER PRIMARY KEY,
         SRId          TEXT,
         RegionName    TEXT
         );
