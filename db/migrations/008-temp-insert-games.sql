@@ -1,4 +1,4 @@
-INSERT INTO Games(SRId, GameName, ShortName)
+INSERT OR IGNORE INTO Games(SRId, GameName, ShortName)
     VALUES    ('xkdk4g1m', 'Jak and Daxter: The Precursor Legacy', 'Jak1'),
               ('ok6qlo1g', 'Jak II', 'Jak2'),
               ('nj1nww1p', 'Jak 3', 'Jak3'),

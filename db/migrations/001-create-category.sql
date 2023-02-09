@@ -1,7 +1,6 @@
-DROP TABLE IF EXISTS Category;
 CREATE TABLE IF NOT EXISTS Category(
         CatId           INTEGER PRIMARY KEY,
-        SRId            TEXT,
+        SRId            TEXT UNIQUE,
         CatName         TEXT,
         GameID          INTEGER,
         IL              INTEGER,

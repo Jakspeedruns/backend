@@ -1,4 +1,4 @@
-INSERT INTO Category(SRId, CatName, GameID, IL)
+INSERT OR IGNORE INTO Category(SRId, CatName, GameID, IL)
     VALUES    ('5dw8r40d', 'No LTS', 'xkdk4g1m', 0),
               ('rkllg7qk', 'No FCS', 'xkdk4g1m', 0),
               ('jdrqj0k6', 'Any%', 'xkdk4g1m', 0),

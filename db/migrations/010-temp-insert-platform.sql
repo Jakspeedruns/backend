@@ -1,4 +1,4 @@
-INSERT INTO Platform(SRId, PlatformName, ShortName)
+INSERT OR IGNORE INTO Platform(SRId, PlatformName, ShortName)
     VALUES    ('n5e17e27', 'Playstation 2', 'PS2'),
               ('mx6pwe3g', 'Playstation 3', 'PS3'),
               ('5negk9y7', 'Playstation Portable', 'PSP'),

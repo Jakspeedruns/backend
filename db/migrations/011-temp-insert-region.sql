@@ -1,4 +1,4 @@
-INSERT INTO Region(SRId, RegionName)
+INSERT OR IGNORE INTO Region(SRId, RegionName)
     VALUES    ('pr184lqn', 'USA / NTSC'),
               ('e6lxy1dz', 'EUR / PAL'),
               ('o316x197', 'JPN / NTSC'),
