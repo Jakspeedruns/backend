@@ -1,9 +1,8 @@
 CREATE TABLE IF NOT EXISTS Category(
-        CatId           INTEGER PRIMARY KEY,
-        SRId            TEXT UNIQUE,
-        CatName         TEXT,
-        GameID          INTEGER,
-        IL              INTEGER,
-        RowCreatedDate  TEXT,
-        Misc            INTEGER
-        );
+        id INTEGER PRIMARY KEY autoincrement,
+        GameID INTEGER REFERENCES Games(id),
+        SRId TEXT UNIQUE,
+        CatName TEXT,
+        IL INTEGER,
+        Misc INTEGER
+);

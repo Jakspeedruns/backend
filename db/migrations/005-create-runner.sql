@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Runner(
-        RunnerId        INTEGER PRIMARY KEY,
+        id        INTEGER PRIMARY KEY autoincrement,
         SRId            TEXT UNIQUE,
         Name            TEXT,
         Guest           INTEGER,
