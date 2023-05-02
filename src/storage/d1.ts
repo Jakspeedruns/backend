@@ -21,7 +21,7 @@ export async function insertNewGame(db: D1Database, game: Game) {
   // Iterate categories
   for (const category of game.categories) {
     console.log(category);
-    batches.push(categoryInsert.bind(2, category.SRId, category.CatName, category.IL, category.Misc));
+    batches.push(categoryInsert.bind(lastRowId, category.SRId, category.CatName, category.IL, category.Misc));
   }
   await db.batch(batches);
 }
