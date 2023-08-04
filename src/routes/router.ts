@@ -1,6 +1,6 @@
 import { Router } from "itty-router";
 import { Env } from "..";
-import { updateSpeedrunRecords } from "../crons/cron-handler";
+import { updateSpeedrunRecords, updateGameLevel, updateGameRegions, updateGamePlatforms, updateLeaderboard } from "../crons/cron-handler";
 import { ListOfRunners } from "./v1/runners";
 
 const routerV2 = Router();
@@ -11,6 +11,10 @@ const routerV2 = Router();
 routerV2
   .get("/cron/speedrunUpdate", updateSpeedrunRecords)
   .get("/v1/runners", ListOfRunners)
+  .get("/cron/platform", updateGamePlatforms)
+  .get("/cron/region", updateGameRegions)
+  .get("/cron/level", updateGameLevel)
+  .get("/cron/gaming", updateLeaderboard)
   .get("*", () => new Response("Not found", { status: 404 }));
 
 export const handleRequest = (request: Request, env: Env, ctx: ExecutionContext) => routerV2.handle(request, env, ctx);
