@@ -1,8 +1,38 @@
-import { Game } from "../storage/models";
-import { Run } from "../storage/models";
-import { Platform } from "../storage/models";
-import { Region } from "../storage/models";
-import { Level } from "../storage/models";
+import { time } from "console";
+import { Game, Run, Platform, Region, Level } from "../storage/models";
+
+function makeTimeString(date: Date) {
+  let hours = date.getUTCHours().toString()
+  ,minutes = date.getUTCMinutes().toString()
+  ,seconds = date.getUTCSeconds().toString()
+  ,milliseconds = date.getUTCMilliseconds().toString()
+  ,timeString = '';
+
+  if (hours != '0') {
+    hours = hours + 'h ';
+  } else {
+    hours = '';
+  }
+  if (minutes != '0') {
+    minutes = minutes + 'm ';
+  } else {
+    minutes = '';
+  }
+  if (seconds != '0') {
+    seconds = seconds + 's ';
+  } else {
+    seconds = '';
+  }
+  if (milliseconds != '0') {
+    milliseconds = milliseconds.padStart(3, '0') + 'ms';
+  } else {
+    milliseconds = '';
+  }
+
+  timeString = hours + minutes + seconds + milliseconds;
+
+  return timeString
+}
 
 class SRCApi {
   async getGameInfo(gameId: string): Promise<Game | undefined> {
@@ -29,6 +59,23 @@ class SRCApi {
     return newGame;
   }
 
+  async getSeriesGames() {
+    // this has all the info needed for a Game obj. 
+    // but for now we just make a game SRID list to call getGameInfo on
+    // https://www.speedrun.com/api/v1/series/d5nk0e49/games
+    const resp = await fetch(`https://www.speedrun.com/api/v1/series/d5nk0e49/games`);
+    if (resp.status !== 200) {
+      return undefined;
+    }
+    const respData: any = await resp.json();
+    let gameList = [];
+    for (const game of respData.data) {
+      console.log('fetching game' + game.id);
+      gameList.push(game.id);
+    }
+    return gameList;
+  }
+
   async getLeaderboard(gameId: string, categoryId: string) {
     // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d
     const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}`);
@@ -43,12 +90,12 @@ class SRCApi {
           SRId: run.run.id,
           gameId: run.run.game,
           categoryId: run.run.category,
-          time: run.run.times.primary,
+          time: '',
           timeSecs: run.run.times.primary_t,
           platformId: run.run.system.platform,
           emulated: run.run.system.emulated * 1, //converts t/f to 1/0
           regionId: run.run.system.region,
-          videoLink: '',          //should maybe use null for all these
+          videoLink: '',
           comment: run.run.comment,
           submitDate: run.run.submitted,
           status: '',
@@ -56,6 +103,7 @@ class SRCApi {
           verifyDate: '',
           variables: JSON.stringify(run.run.values),
         };
+        //set the things that can be null
         if (run.run.videos !== null) {
           arun.videoLink = run.run.videos.links[0].uri; //currently only first video
         }
@@ -64,6 +112,10 @@ class SRCApi {
           arun.examiner = run.run.status.examiner;
           arun.verifyDate = run.run.status["verify-date"];
         }
+
+        let dateObj = new Date(arun.timeSecs * 1000)        
+        arun.time = makeTimeString(dateObj);
+
         leaderboard.push(arun);
       }
       return leaderboard;

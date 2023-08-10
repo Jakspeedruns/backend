@@ -1,10 +1,10 @@
 import { Env } from "..";
 import { createSpeedrunAPIClient } from "../external/src-api";
-import { insertNewGame } from "../storage/d1";
-import { insertPlatform } from "../storage/d1";
-import { insertRegion } from "../storage/d1";
-import { insertLevel } from "../storage/d1";
-import { insertLeaderboard } from "../storage/d1";
+import { insertNewGame
+        ,insertPlatform
+        ,insertRegion
+        ,insertLevel
+        ,insertLeaderboard } from "../storage/d1";
 
 // a difference
 export async function updateSpeedrunRecords(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
@@ -79,6 +79,24 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
   }
 
   console.log("TODO updated leaderboard");
+
+  return;
+}
+
+export async function updateSeriesGames(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
+  // Create a Speedrun.com API client
+  const client = createSpeedrunAPIClient();
+  
+  const gameIdList = await client.getSeriesGames();
+  if (gameIdList !== undefined) {
+    for (const gameId of gameIdList ) {
+      const game = await client.getGameInfo(gameId);
+      if (game !== undefined) {
+        await insertNewGame(env.DB, game);
+      }
+    }
+  }
+  console.log("Updated games/cats :o");
 
   return;
 }
