@@ -21,13 +21,33 @@ export async function insertNewGame(db: D1Database, game: Game) {
   const gameInsert = db.prepare("INSERT INTO Games (SRId, GameName, ShortName) VALUES (?, ?, ?) RETURNING id;");
   const categoryInsert = db.prepare("INSERT INTO Category (GameID, SRId, CatName, IL, Misc) VALUES (?, ?, ?, ?, ?);");
 
-  const lastRowId = await gameInsert.bind(game.srcId, game.gameName, game.shortName).first("id");
+  const platformInsert = db.prepare("INSERT OR IGNORE INTO Platform (SRId, PlatformName, Shortname) VALUES (?, ?, ?);");
+  const regionInsert = db.prepare("INSERT OR IGNORE INTO Region (SRId, RegionName) VALUES (?, ?);");
+  const levelInsert = db.prepare("INSERT INTO Level (SRId, LevelName, GameId) VALUES (?, ?, ?);");
+
+  const lastRowId = await gameInsert.bind(game.srcId, game.gameName, game.shortName).first("id"); 
 
   // Iterate categories
   for (const category of game.categories) {
     console.log(category);
     batches.push(categoryInsert.bind(lastRowId, category.SRId, category.CatName, category.IL, category.Misc));
   }
+  // Iterate platforms
+  for (const platform of game.platforms) {
+    console.log(platform);
+    batches.push(platformInsert.bind(platform.srcId, platform.platformName, platform.shortName));
+  }
+  // Iterate regions
+  for (const region of game.regions) {
+    console.log(region);
+    batches.push(regionInsert.bind(region.srcId, region.regionName));
+  }
+  // Iterate levels
+  for (const level of game.levels) {
+    console.log(level);
+    batches.push(levelInsert.bind(level.srcId, level.levelName, level.gameId));
+  }
+
   await db.batch(batches);
 }
 

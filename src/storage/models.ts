@@ -10,6 +10,9 @@ export interface Game {
   gameName: string;
   shortName: string;
   categories: Category[];
+  platforms: Platform[];
+  regions: Region[];
+  levels: Level[];
 }
 
 export interface Run {

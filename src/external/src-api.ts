@@ -36,8 +36,8 @@ function makeTimeString(date: Date) {
 
 class SRCApi {
   async getGameInfo(gameId: string): Promise<Game | undefined> {
-    // https://www.speedrun.com/api/v1/games/xkdk4g1m?embed=categories
-    const resp = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}?embed=categories`);
+    // https://www.speedrun.com/api/v1/games/xkdk4g1m?embed=categories,platforms,regions,levels
+    const resp = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}?embed=categories,platforms,regions,levels`);
     if (resp.status !== 200) {
       return undefined;
     }
@@ -47,6 +47,9 @@ class SRCApi {
       gameName: respData.data.names.international,
       shortName: respData.data.abbreviation,
       categories: [],
+      platforms: [],
+      regions: [],
+      levels: []
     };
     for (const category of respData.data.categories.data) {
       newGame.categories.push({
@@ -54,6 +57,26 @@ class SRCApi {
         CatName: category.name,
         IL: 0, // TODO - this requires a different lookup, tbh levels should probably be their own table for that reason
         Misc: category.miscellaneous === true ? 1 : 0,
+      });
+    }
+    for (const plat of respData.data.platforms.data) {
+      newGame.platforms.push({
+        srcId: plat.id,
+        platformName: plat.name,
+        shortName: '', //not included in json, eg: ps2, bcps3
+      });
+    }
+    for (const reg of respData.data.regions.data) {
+      newGame.regions.push({
+        srcId: reg.id,
+        regionName: reg.name,
+      });
+    }
+    for (const lev of respData.data.levels.data) {
+      newGame.levels.push({
+        srcId: lev.id,
+        levelName: lev.name,
+        gameId: gameId  //weird lol
       });
     }
     return newGame;
@@ -70,7 +93,6 @@ class SRCApi {
     const respData: any = await resp.json();
     let gameList = [];
     for (const game of respData.data) {
-      console.log('fetching game' + game.id);
       gameList.push(game.id);
     }
     return gameList;
