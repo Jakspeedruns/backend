@@ -1,9 +1,5 @@
-import { Env } from "..";
-import { Game } from "./models";
-import { Platform } from "./models";
-import { Region } from "./models";
-import { Level } from "./models";
-import { Run } from "./models";
+import { Env, } from "..";
+import { Game, Run, Runner, Platform, Region, Level } from "./models";
 
 
 export async function batchUpdateSpeedruns(env: Env, something: string) {
@@ -51,6 +47,18 @@ export async function insertNewGame(db: D1Database, game: Game) {
   await db.batch(batches);
 }
 
+export async function insertRunner(db: D1Database, runners: Runner[]) {
+  const batches: D1PreparedStatement[] = [];
+  const runnerInsert = db.prepare("INSERT OR REPLACE INTO Runner (SRId, Name, Guest, Twitch, SRC, RowCreatedDate) VALUES (?, ?, ?, ?, ?, ?);");
+
+  for (const runner of runners) {
+    console.log(runner);
+    let timestamp = new Date(Date.now())
+    batches.push(runnerInsert.bind(runner.SRId, runner.name, runner.guest, runner.twitch, runner.SRC, timestamp.toISOString() ));
+  }
+  await db.batch(batches);
+}
+
 export async function insertPlatform(db: D1Database, plats: Platform[]) {
   const batches: D1PreparedStatement[] = [];
   const platformInsert = db.prepare("INSERT INTO Platform (SRId, PlatformName, Shortname) VALUES (?, ?, ?);");
@@ -89,17 +97,18 @@ export async function insertLeaderboard(db: D1Database, leaderboard: Run[]) {
   const batches: D1PreparedStatement[] = [];
   const runsInsert = db.prepare("INSERT INTO Runs \
   (SRId, GameId, CategoryId, time, timeSecs, platformId, emulated, regionId, \
-    videoLink, comment, submitDate, status, examiner, verifyDate, variables) \
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+    videoLink, comment, submitDate, status, examiner, verifyDate, variables, RowCreatedDate) \
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
   // Iterate categories
   for (const run of leaderboard) {
     //console.log(run);
+    let timestamp = new Date(Date.now())
     batches.push(runsInsert.bind(run.SRId, run.gameId, run.categoryId, run.time, 
       run.timeSecs, run.platformId, run.emulated, run.regionId, run.videoLink, run.comment, 
-      run.submitDate, run.status, run.examiner, run.verifyDate, run.variables));
+      run.submitDate, run.status, run.examiner, run.verifyDate, run.variables, timestamp.toISOString()));
   }
-  console.log('batched inserts');
-  console.log(batches);
+  console.log('batched inserts for leaderboard runs');
+  //console.log(batches);
   await db.batch(batches);
 }

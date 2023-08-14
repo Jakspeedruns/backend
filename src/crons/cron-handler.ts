@@ -1,6 +1,7 @@
 import { Env } from "..";
 import { createSpeedrunAPIClient } from "../external/src-api";
 import { insertNewGame
+        ,insertRunner
         ,insertPlatform
         ,insertRegion
         ,insertLevel
@@ -72,8 +73,14 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
   // Create a Speedrun.com API client
   const client = createSpeedrunAPIClient();
 
-  // also a Simple test with Jak 1
-  const leaderboard = await client.getLeaderboard("xkdk4g1m", "5dw8r40d");
+  // this has red lines but runs well
+  const { leaderboard, players } = await client.getLeaderboard("xkdk4g1m", "5dw8r40d");
+  
+  if (players !== undefined) {
+    console.log('pretend to insert players')
+    await insertRunner(env.DB, players);
+  }
+
   if (leaderboard !== undefined) {
     await insertLeaderboard(env.DB, leaderboard);
   }
@@ -96,7 +103,7 @@ export async function updateSeriesGames(req: any, env: Env, ctx: ExecutionContex
       }
     }
   }
-  console.log("Updated games/cats :o");
+  console.log("Updated games/cats/plats/regions/levels :o");
 
   return;
 }

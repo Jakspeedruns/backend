@@ -1,5 +1,5 @@
 import { time } from "console";
-import { Game, Run, Platform, Region, Level } from "../storage/models";
+import { Game, Run, Runner, Platform, Region, Level } from "../storage/models";
 
 function makeTimeString(date: Date) {
   let hours = date.getUTCHours().toString()
@@ -19,12 +19,12 @@ function makeTimeString(date: Date) {
     minutes = '';
   }
   if (seconds != '0') {
-    seconds = seconds + 's ';
+    seconds = seconds + 's';
   } else {
     seconds = '';
   }
   if (milliseconds != '0') {
-    milliseconds = milliseconds.padStart(3, '0') + 'ms';
+    milliseconds = ' ' + milliseconds.padStart(3, '0') + 'ms';
   } else {
     milliseconds = '';
   }
@@ -99,18 +99,20 @@ class SRCApi {
   }
 
   async getLeaderboard(gameId: string, categoryId: string) {
-    // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d
-    const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}`);
+    // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d?embed=players
+    const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}?embed=players`);
     if (resp.status !== 200) {
       return undefined;
     }
     const respData: any = await resp.json();
+    //leaderboard
     let leaderboard: Run[] = [];
       for (const run of respData.data.runs) {
         //console.log(run.run.id)
         let arun = {
           SRId: run.run.id,
           gameId: run.run.game,
+          levelId: run.run.level,
           categoryId: run.run.category,
           time: '',
           timeSecs: run.run.times.primary_t,
@@ -134,13 +136,44 @@ class SRCApi {
           arun.examiner = run.run.status.examiner;
           arun.verifyDate = run.run.status["verify-date"];
         }
-
+        //time stuff
         let dateObj = new Date(arun.timeSecs * 1000)        
         arun.time = makeTimeString(dateObj);
-
+        //add to list
         leaderboard.push(arun);
       }
-      return leaderboard;
+    //this is one of the ways to fetch players
+    //so we fetch players here
+    let players: Runner[] = [];
+      for (const player of respData.data.players.data) {
+        let runner = {
+          SRId: '',
+          name: '',
+          guest: 0,
+          twitch: '',
+          SRC: '',
+        };
+        if (player.rel === "guest") {
+          //make a fake SRId for guests so that we have a unique field to OR REPLACE with
+          runner.SRId = 'ID' + player.name; 
+          runner.name = player.name;
+          runner.guest = 1;
+          runner.twitch = '';
+          runner.SRC = '';
+        } else if (player.rel === "user") {
+          runner.SRId = player.id;
+          runner.name = player.names.international;
+          runner.guest = 0;
+          if ( player.twitch !== null) {
+            runner.twitch = player.twitch.uri;
+          }
+          runner.SRC = player.weblink;
+        }
+        //add to list
+        players.push(runner);
+      }
+
+      return { leaderboard , players };
   }
 
   async getPlatform(gameId: string) {

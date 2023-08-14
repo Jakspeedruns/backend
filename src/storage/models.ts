@@ -33,6 +33,14 @@ export interface Run {
   variables: string;
 }
 
+export interface Runner {
+  SRId: string;
+  name: string;
+  guest: number;
+  twitch: string;
+  SRC: string;
+}
+
 export interface Platform {
   srcId: string;
   platformName: string;

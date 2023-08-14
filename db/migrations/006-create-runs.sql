@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS Runs(
     RunId          INTEGER PRIMARY KEY,
     SRId           TEXT UNIQUE,
     GameId         INTEGER,
+    LevelId        TEXT,
     CategoryId     INTEGER,
     Time           TEXT,
     TimeSecs       REAL,
