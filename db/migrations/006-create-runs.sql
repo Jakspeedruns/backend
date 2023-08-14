@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Runs(
-    RunId          INTEGER PRIMARY KEY,
+    RunId          INTEGER PRIMARY KEY autoincrement,
     SRId           TEXT UNIQUE,
     GameId         INTEGER,
     LevelId        TEXT,

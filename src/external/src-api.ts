@@ -52,12 +52,16 @@ class SRCApi {
       levels: []
     };
     for (const category of respData.data.categories.data) {
-      newGame.categories.push({
+      let cat = {
         SRId: category.id,
         CatName: category.name,
         IL: 0, // TODO - this requires a different lookup, tbh levels should probably be their own table for that reason
         Misc: category.miscellaneous === true ? 1 : 0,
-      });
+      };
+      if ( category.type === 'per-level' ) {
+        cat.IL = 1
+      }
+      newGame.categories.push(cat)
     }
     for (const plat of respData.data.platforms.data) {
       newGame.platforms.push({

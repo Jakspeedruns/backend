@@ -18,6 +18,7 @@ export interface Game {
 export interface Run {
   SRId: string;
   gameId: string;
+  levelId: string;
   categoryId: string;
   time: string;
   timeSecs: number;

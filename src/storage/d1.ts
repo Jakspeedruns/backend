@@ -96,15 +96,15 @@ export async function insertLevel(db: D1Database, levs: Level[]) {
 export async function insertLeaderboard(db: D1Database, leaderboard: Run[]) {
   const batches: D1PreparedStatement[] = [];
   const runsInsert = db.prepare("INSERT INTO Runs \
-  (SRId, GameId, CategoryId, time, timeSecs, platformId, emulated, regionId, \
+  (SRId, GameId, LevelId, CategoryId, time, timeSecs, platformId, emulated, regionId, \
     videoLink, comment, submitDate, status, examiner, verifyDate, variables, RowCreatedDate) \
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
   // Iterate categories
   for (const run of leaderboard) {
     //console.log(run);
     let timestamp = new Date(Date.now())
-    batches.push(runsInsert.bind(run.SRId, run.gameId, run.categoryId, run.time, 
+    batches.push(runsInsert.bind(run.SRId, run.gameId, run.levelId, run.categoryId, run.time, 
       run.timeSecs, run.platformId, run.emulated, run.regionId, run.videoLink, run.comment, 
       run.submitDate, run.status, run.examiner, run.verifyDate, run.variables, timestamp.toISOString()));
   }

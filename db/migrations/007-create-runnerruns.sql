@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS RunnerRuns(
-    RunnerRunId         INTEGER PRIMARY KEY,
+    RunnerRunId         INTEGER PRIMARY KEY autoincrement,
     RunnerId            INTEGER REFERENCES Runner(id),
     RunId               INTEGER REFERENCES Runs(id),
 
