@@ -133,7 +133,9 @@ class SRCApi {
         };
         //set the things that can be null
         if (run.run.videos !== null) {
-          arun.videoLink = run.run.videos.links[0].uri; //currently only first video
+          if (run.videos.links !== undefined) { //needs undefined specifically
+            arun.videoLink = run.run.videos.links[0].uri; //currently only first video
+          }
         }
         if (run.run.status !== null) {
           arun.status = run.run.status.status;
@@ -232,6 +234,76 @@ class SRCApi {
       });
     }
     return levs;
+  }
+
+  async getRuns(gameId: string, offset: number = 0 ) {
+    // https://www.speedrun.com/api/v1/runs?game=xkdk4g1m&max=200&offset=0
+    // https://www.speedrun.com/api/v1/runs?game=xkdk4g1m&max=200&offset=3000
+    // &embed=players probably get players here
+    const resp = await fetch(`https://www.speedrun.com/api/v1/runs?game=${gameId}&max=200&offset=${offset}`);
+    if (resp.status !== 200) {
+      return undefined;
+    }
+    const respData: any = await resp.json();
+    //one page of runs
+    let runlist: Run[] = [];
+      for (const run of respData.data) {
+        let arun = {
+          SRId: run.id,
+          gameId: run.game,
+          levelId: run.level,
+          categoryId: run.category,
+          time: '',
+          timeSecs: run.times.primary_t,
+          platformId: run.system.platform,
+          emulated: run.system.emulated * 1, //converts t/f to 1/0
+          regionId: run.system.region,
+          videoLink: '',
+          comment: run.comment,
+          submitDate: run.submitted,
+          status: '',
+          examiner: '',
+          verifyDate: '',
+          variables: JSON.stringify(run.values),
+        };
+        //set the things that can be null
+        if (run.videos !== null) {
+          if (run.videos.links !== undefined) { //needs undefined specifically
+            arun.videoLink = run.videos.links[0].uri; //currently only first video
+          }
+        }
+        if (run.status !== null) {
+          arun.status = run.status.status;
+          arun.examiner = run.status.examiner;
+          arun.verifyDate = run.status["verify-date"];
+        }
+        //time stuff
+        let dateObj = new Date(arun.timeSecs * 1000)        
+        arun.time = makeTimeString(dateObj);
+        //add to list
+        runlist.push(arun);
+        //console.log(arun.SRId)
+      }
+
+      //pagination
+      //they give a link but eh
+      if (respData.pagination !== null) {
+        let newOffset = respData.pagination.size + respData.pagination.offset
+        for (const link of respData.pagination.links) {
+          if (link.rel == "next") {
+            console.log("-----------going deeper--------------")
+            console.log("ts:" + Date.now())
+            let test = await this.getRuns(gameId, newOffset);
+            if (test !== undefined) {
+              runlist.push.apply(runlist, test)
+              console.log("-----------success--------------")
+            }
+          }
+        }
+      }
+      console.log("-----------success2--------------")
+      console.log(runlist.length)
+    return runlist;
   }
 
 

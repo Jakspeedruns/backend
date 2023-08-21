@@ -5,7 +5,9 @@ import { updateSpeedrunRecords
         ,updateGameRegions
         ,updateGamePlatforms
         ,updateLeaderboard
-        ,updateSeriesGames } from "../crons/cron-handler";
+        ,updateSeriesGames 
+        ,test, 
+        updateRuns} from "../crons/cron-handler";
 import { ListOfRunners } from "./v1/runners";
 
 const routerV2 = Router();
@@ -21,6 +23,9 @@ routerV2
   .get("/cron/gaming", updateLeaderboard)
   .get("/cron/speedrunUpdate", updateSpeedrunRecords)
   .get("/v1/runners", ListOfRunners)
+  .get("/cron/test", test)
+  .get("/cron/runs", updateRuns)
+
 
   .get("*", () => new Response("Not found", { status: 404 }));
 

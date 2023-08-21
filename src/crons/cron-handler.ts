@@ -5,7 +5,8 @@ import { insertNewGame
         ,insertPlatform
         ,insertRegion
         ,insertLevel
-        ,insertLeaderboard } from "../storage/d1";
+        ,insertLeaderboard 
+        ,selectGameCatSRIds} from "../storage/d1";
 
 // a difference
 export async function updateSpeedrunRecords(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
@@ -69,6 +70,21 @@ export async function updateGameLevel(req: any, env: Env, ctx: ExecutionContext)
   return;
 }
 
+export async function test(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
+//this doesn't work its an array
+  let { GameSRId, CatSRId } = await selectGameCatSRIds(env.DB);
+
+//
+//
+//
+//
+//
+  console.log(GameSRId)
+  console.log("TODO");
+
+  return;
+}
+
 export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
   // Create a Speedrun.com API client
   const client = createSpeedrunAPIClient();
@@ -77,7 +93,7 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
   const { leaderboard, players } = await client.getLeaderboard("xkdk4g1m", "5dw8r40d");
   
   if (players !== undefined) {
-    console.log('pretend to insert players')
+    console.log('insert leaderboard players')
     await insertRunner(env.DB, players);
   }
 
@@ -104,6 +120,23 @@ export async function updateSeriesGames(req: any, env: Env, ctx: ExecutionContex
     }
   }
   console.log("Updated games/cats/plats/regions/levels :o");
+
+  return;
+}
+
+
+
+export async function updateRuns(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
+  // Create a Speedrun.com API client
+  const client = createSpeedrunAPIClient();
+
+  // also a Simple test with Jak 1
+  const runs = await client.getRuns("xkdk4g1m");
+  if (runs !== undefined) {
+    await insertLeaderboard(env.DB, runs);
+  }
+
+  console.log("TODO updated runs");
 
   return;
 }

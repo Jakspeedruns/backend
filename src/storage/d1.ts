@@ -92,6 +92,13 @@ export async function insertLevel(db: D1Database, levs: Level[]) {
   await db.batch(batches);
 }
 
+export async function selectGameCatSRIds(db: D1Database) {
+  //results is one of the things .all() returns
+  let { results } = await db.prepare("SELECT g.SRId as GameSRId, c.SRId as CatSRId \
+                  FROM Category as c JOIN Games as g on c.GameID = g.id").all();
+  return results;
+}
+
 
 export async function insertLeaderboard(db: D1Database, leaderboard: Run[]) {
   const batches: D1PreparedStatement[] = [];
