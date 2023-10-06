@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Region(
-        RegionId      INTEGER PRIMARY KEY,
+        id      INTEGER PRIMARY KEY autoincrement,
         SRId          TEXT UNIQUE,
         RegionName    TEXT
         );

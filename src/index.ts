@@ -5,24 +5,20 @@ import { handleRequest } from "./routes/router";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Env {
-	DB: D1Database;
-	GITHUB_TOKEN: string;
+  DB: D1Database;
+  GITHUB_TOKEN: string;
 }
 
 const worker = {
-	// API Handler
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext
-	): Promise<Response> {
-		return handleRequest(request, env, ctx);
-	},
-	// Periodic CRON handler
-	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-		// https://developers.cloudflare.com/workers/examples/multiple-cron-triggers/
-		// ctx.waitUntil(); TODO
-	},
+  // API Handler
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    return handleRequest(request, env, ctx);
+  },
+  // Periodic CRON handler
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    // https://developers.cloudflare.com/workers/examples/multiple-cron-triggers/
+    // ctx.waitUntil(); TODO
+  },
 };
 
 export default worker;

@@ -1,4 +1,4 @@
 CREATE TABLE IF NOT EXISTS Version(
-        VersionId      INTEGER PRIMARY KEY,
+        id      INTEGER PRIMARY KEY autoincrement,
         VersionName    TEXT
         );

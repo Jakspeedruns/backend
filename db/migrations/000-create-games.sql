@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS Games(
-        GameId      INTEGER PRIMARY KEY,
-        SRId        TEXT UNIQUE,
-        GameName    TEXT,
-        ShortName   TEXT
-        );
+        id INTEGER PRIMARY KEY autoincrement,
+        SRId TEXT UNIQUE,
+        GameName TEXT,
+        ShortName TEXT
+);

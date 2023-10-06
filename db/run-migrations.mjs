@@ -13,6 +13,10 @@ export const execute = utils.promisify(exec);
 const run = async () => {
 	let files = fs.readdirSync("./db/migrations").sort();
 	for (const file of files) {
+		if (file.includes("temp")) {
+			console.log("Skipping temp migration");
+			continue;
+		}
 		await execute(`wrangler d1 execute jsr-backend-db --yes --local --file=./db/migrations/${file}`);
 	}
 };
