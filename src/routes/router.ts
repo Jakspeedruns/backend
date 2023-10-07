@@ -2,6 +2,7 @@ import { Router } from "itty-router";
 import { Env } from "..";
 import { updateSpeedrunRecords } from "../crons/cron-handler";
 import { ListOfRunners } from "./v1/runners";
+import { SubmissionHandler } from "./discord/highscores";
 
 const routerV2 = Router();
 
@@ -9,6 +10,7 @@ const routerV2 = Router();
 // they should be disabled if the worker is running in API mode
 
 routerV2
+  .post("/discord/submissions", SubmissionHandler)
   .get("/cron/speedrunUpdate", updateSpeedrunRecords)
   .get("/v1/runners", ListOfRunners)
   .get("*", () => new Response("Not found", { status: 404 }));

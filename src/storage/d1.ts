@@ -1,6 +1,74 @@
 import { Env } from "..";
 import { Game } from "./models";
 
+function generateUUID() {
+  var d = new Date().getTime();
+  var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16;
+      if(d > 0){
+          r = (d + r)%16 | 0;
+          d = Math.floor(d/16);
+      } else {
+          r = (d2 + r)%16 | 0;
+          d2 = Math.floor(d2/16);
+      }
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+export interface NewSubmissionResponse {
+  submissionId: string,
+  isNewPlayer: boolean
+}
+
+export async function insertNewHighscoreSubmission(db: D1Database, highscoreId: number, videoLink: string, playerName: string, score: string): Promise<NewSubmissionResponse | undefined> {
+  const submissionInsert = db.prepare("INSERT INTO highscores_submissions (highscore_id, player_name, submission_id, submission_status, score, video_link) VALUES (?, ?, ?, ?, ?, ?);");
+  const submissionId = generateUUID();
+  await submissionInsert.bind(highscoreId, playerName, submissionId, 0, score, videoLink).run();
+  // Check if it's a new plyaer
+  let playerId = await db.prepare("SELECT id FROM highscores_players WHERE player_name = ?;").bind(playerName).first("id");
+  return {
+    submissionId,
+    isNewPlayer: playerId === null
+  };
+}
+
+export async function rejectHighscoreSubmission(db: D1Database, submissionId: string, reason: string): Promise<string> {
+  const submissionInfo = await db.prepare("SELECT * FROM highscores_submissions WHERE submission_id = ?;").bind(submissionId).first();
+  if (submissionInfo.submission_status !== 0) {
+    return "Already approved/rejected";
+  }
+  const submissionInsert = db.prepare("UPDATE highscores_submissions SET submission_status = 2, rejection_reason = ? WHERE submission_id = ?;");
+  await submissionInsert.bind(reason, submissionId).run();
+  return "";
+}
+
+export async function approveHighscoreSubmission(db: D1Database, submissionId: string): Promise<string> {
+  const submissionInfo = await db.prepare("SELECT * FROM highscores_submissions WHERE submission_id = ?;").bind(submissionId).first();
+  if (submissionInfo.submission_status !== 0) {
+    return "Already approved/rejected";
+  }
+  // TODO - Transactions via stored procedures
+  // First, mark the submission as approved
+  const submissionInsert = db.prepare("UPDATE highscores_submissions SET submission_status = 1 WHERE submission_id = ?;");
+  await submissionInsert.bind(submissionId).run();
+  // Next, make sure the player exists (get it's id), if not we insert a new player for the first time
+  let playerId = await db.prepare("SELECT id FROM highscores_players WHERE player_name = ?;").bind(submissionInfo.player_name).first("id");
+  if (playerId === null) {
+    const playerInsert = db.prepare("INSERT OR IGNORE INTO highscores_players (player_name) VALUES (?) RETURNING id;");
+    playerId = await playerInsert.bind(submissionInfo.player_name).first("id");
+  }
+  console.log(playerId);
+  // Archive any runs by that player for that highscore
+  const archiveUpdate = db.prepare("UPDATE highscores_entries SET archived = 1 WHERE player_id = ? AND highscore_id = ?;");
+  await archiveUpdate.bind(playerId, submissionInfo.highscore_id).run();
+  // Finally, insert the new highscore
+  const highscoreInsert = db.prepare("INSERT INTO highscores_entries (player_id, highscore_id, score, video_link, archived) VALUES (?, ?, ?, ?, ?);");
+  await highscoreInsert.bind(playerId, submissionInfo.highscore_id, submissionInfo.score, submissionInfo.video_link, 0).run();
+  return "";
+}
+
 export async function batchUpdateSpeedruns(env: Env, something: string) {
   // TODO - update the database!
   env.DB.exec("TODO!");

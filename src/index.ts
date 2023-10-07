@@ -6,7 +6,7 @@ import { handleRequest } from "./routes/router";
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Env {
   DB: D1Database;
-  GITHUB_TOKEN: string;
+  DISCORD_PUBLIC_KEY: String;
 }
 
 const worker = {

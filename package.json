@@ -21,13 +21,17 @@
   "private": true,
   "scripts": {
     "setup-db": "node ./db/run-migrations.mjs",
-    "start": "wrangler dev --local --persist",
+    "start": "wrangler dev --local",
     "deploy": "wrangler publish",
     "test": "vitest",
-    "format": "npx prettier --write ./src ./test"
+    "format": "npx prettier --write ./src ./test",
+    "discord-register": "node ./discord-commands.mjs"
   },
   "dependencies": {
+    "discord-interactions": "^3.4.0",
+    "dotenv": "^16.3.1",
     "itty-router": "^4.0.23",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "tweetnacl": "^1.0.3"
   }
 }
