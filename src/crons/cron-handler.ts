@@ -4,17 +4,20 @@ import { insertNewGame } from "../storage/d1";
 
 // a difference
 export async function updateSpeedrunRecords(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
-  // Create a Speedrun.com API client
-  const client = createSpeedrunAPIClient();
+  // // Create a Speedrun.com API client
+  // const client = createSpeedrunAPIClient();
 
-  // Do something with it
-  // TODO Simple test with Jak 1
-  const game = await client.getGameInfo("xkdk4g1m");
-  if (game !== undefined) {
-    await insertNewGame(env.DB, game);
-  }
+  // // Do something with it
+  // // TODO Simple test with Jak 1
+  // const game = await client.getGameInfo("xkdk4g1m");
+  // if (game !== undefined) {
+  //   await insertNewGame(env.DB, game);
+  // }
 
-  console.log("TODO updated speedrun records");
+  // console.log("TODO updated speedrun records");
 
-  return;
+  const body = JSON.stringify({ hello: "world" });
+  // TODO - CORS
+  const headers = { "Content-type": "application/json" };
+  return new Response(body, { headers });
 }

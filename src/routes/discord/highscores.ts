@@ -50,7 +50,6 @@ function highscoreIdToName(highscoreId: number): string {
       return "Marauders Challenge";
     default:
       return "";
-
   }
 }
 
@@ -82,19 +81,27 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
       const reason = data.data.components[0].components[0].value;
       const resp = await rejectHighscoreSubmission(env.DB, submissionId, reason);
       // TODO - handle if it fails
-      return new Response(JSON.stringify({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: resp === "" ? `Submission Rejected: **${reason}**` : resp,
-          flags: resp === "" ? 0 : 64
-        } }), { headers });
+      return new Response(
+        JSON.stringify({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: resp === "" ? `Submission Rejected: **${reason}**` : resp,
+            flags: resp === "" ? 0 : 64,
+          },
+        }),
+        { headers },
+      );
     }
   } else if (type === InteractionType.APPLICATION_COMMAND) {
     const commandName = data.data.name;
-    if (commandName === 'submit') {
+    if (commandName === "submit") {
       // Verify that - the video_link appears somewhat valid
       // If we're all good, then insert the submission into the database
       const inputs = data.data.options;
-      if (inputs.length === 1 && (inputs[0].name === 'jak1' || inputs[0].name === 'jak2' || inputs[0].name === 'jak3')) {
+      if (
+        inputs.length === 1 &&
+        (inputs[0].name === "jak1" || inputs[0].name === "jak2" || inputs[0].name === "jak3")
+      ) {
         let videoLink = "";
         let highscoreId = -1;
         let playerName = "";
@@ -114,63 +121,91 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
           videoLink = "https://" + videoLink;
         }
         if (!videoLink.includes("youtube") && !videoLink.includes("youtu.be") && !videoLink.includes("twitch")) {
-          return new Response(JSON.stringify({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: `Video link doesn't appear to be a youtube or twitch URL`,
-              flags: 64
-            } }), { headers });
+          return new Response(
+            JSON.stringify({
+              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+              data: {
+                content: `Video link doesn't appear to be a youtube or twitch URL`,
+                flags: 64,
+              },
+            }),
+            { headers },
+          );
         }
         // TODO - make sure everything is set
         const submissionResp = await insertNewHighscoreSubmission(env.DB, highscoreId, videoLink, playerName, score);
         // TODO - handle null
-        return new Response(JSON.stringify({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `Submission looks good, wait for it to be verified by a moderator!\n**Game:** ${inputs[0].name}\n**Highscore:** ${highscoreIdToName(highscoreId)}\n**Score:** ${score}\n**Proof:** [Video Link](${videoLink})\n**Existing Player?:** ${!submissionResp?.isNewPlayer} (${playerName})\n**Submission ID:** \`${submissionResp?.submissionId}\``,
-          } }), { headers });
+        return new Response(
+          JSON.stringify({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: `Submission looks good, wait for it to be verified by a moderator!\n**Game:** ${
+                inputs[0].name
+              }\n**Highscore:** ${highscoreIdToName(
+                highscoreId,
+              )}\n**Score:** ${score}\n**Proof:** [Video Link](${videoLink})\n**Existing Player?:** ${!submissionResp?.isNewPlayer} (${playerName})\n**Submission ID:** \`${submissionResp?.submissionId}\``,
+            },
+          }),
+          { headers },
+        );
       }
-    } else if (commandName === '❌ Reject') {
+    } else if (commandName === "❌ Reject") {
       const messages = data.data.resolved.messages;
       let submissionId = "";
       for (const [messageId, messageData] of Object.entries(messages)) {
         if (messageData.content.includes("**Submission ID:**")) {
-          submissionId = messageData.content.split('**Submission ID:**')[1].trim().replaceAll("\`", "");
+          submissionId = messageData.content.split("**Submission ID:**")[1].trim().replaceAll("`", "");
         }
       }
       if (submissionId !== "") {
-        return new Response(JSON.stringify({ type: InteractionResponseType.MODAL,
-          data: {
-            title: "Rejection Confirmation",
-            custom_id: `rm-${submissionId}`,
-            components: [
-              {"type": 1,
-              "components": [{
-                "type": 4,
-                "custom_id": "reason",
-                "style": 1,
-                "label": "Reason",
-                "min_length": 1,
-                "max_length": 200,
-                "required": true
-              }]}
-            ]
-          } }), { headers });
+        return new Response(
+          JSON.stringify({
+            type: InteractionResponseType.MODAL,
+            data: {
+              title: "Rejection Confirmation",
+              custom_id: `rm-${submissionId}`,
+              components: [
+                {
+                  type: 1,
+                  components: [
+                    {
+                      type: 4,
+                      custom_id: "reason",
+                      style: 1,
+                      label: "Reason",
+                      min_length: 1,
+                      max_length: 200,
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          }),
+          { headers },
+        );
       }
-    } else if (commandName === '✅ Verify') {
+    } else if (commandName === "✅ Verify") {
       const messages = data.data.resolved.messages;
       let submissionId = "";
       for (const [messageId, messageData] of Object.entries(messages)) {
         if (messageData.content.includes("**Submission ID:**")) {
-          submissionId = messageData.content.split('**Submission ID:**')[1].trim().replaceAll("\`", "");
+          submissionId = messageData.content.split("**Submission ID:**")[1].trim().replaceAll("`", "");
         }
       }
       const msg = await approveHighscoreSubmission(env.DB, submissionId);
       // TODO - handle if it fails
       if (submissionId !== "") {
-        return new Response(JSON.stringify({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: msg === "" ? "Submission Approved!" : msg,
-            flags: msg === "" ? 0 : 64
-          } }), { headers });
+        return new Response(
+          JSON.stringify({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: msg === "" ? "Submission Approved!" : msg,
+              flags: msg === "" ? 0 : 64,
+            },
+          }),
+          { headers },
+        );
       }
     }
   }
