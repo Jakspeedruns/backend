@@ -16,8 +16,10 @@ const run = async () => {
 		if (file.includes("temp")) {
 			console.log("Skipping temp migration");
 			continue;
+		} else {
+			console.log("Running migration", file);
 		}
-		await execute(`wrangler d1 execute jsr-backend-db --yes --local --file=./db/migrations/${file}`);
+		await execute(`wrangler d1 execute jakspeedruns-db --yes --local --file=./db/migrations/${file}`);
 	}
 };
 
