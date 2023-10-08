@@ -45,7 +45,7 @@ const SUBMIT_HIGHSCORE = {
       options: [
         {
           "name": "player-name",
-          "description": "Name of the player (lowercase)",
+          "description": "Name of the player (case-sensitive)",
           "type": 3,
           "required": true
         },
@@ -82,7 +82,7 @@ const SUBMIT_HIGHSCORE = {
       options: [
         {
           "name": "player-name",
-          "description": "Name of the player (lowercase)",
+          "description": "Name of the player (case-sensitive)",
           "type": 3,
           "required": true
         },
@@ -143,7 +143,7 @@ const SUBMIT_HIGHSCORE = {
       options: [
         {
           "name": "player-name",
-          "description": "Name of the player (lowercase)",
+          "description": "Name of the player (case-sensitive)",
           "type": 3,
           "required": true
         },

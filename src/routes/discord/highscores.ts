@@ -112,7 +112,7 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
           } else if (input.name === "id") {
             highscoreId = parseInt(input.value);
           } else if (input.name === "player-name") {
-            playerName = input.value.toLowerCase();
+            playerName = input.value;
           } else if (input.name === "score") {
             score = input.value;
           }
