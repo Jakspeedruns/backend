@@ -69,7 +69,7 @@ export interface Highscores {
 export async function getHighscores(db: D1Database, highscoreId: number): Promise<Highscores[]> {
   const rows = await db
     .prepare(
-      "SELECT highscores_players.player_name, highscores_entries.score, highscores_entries.video_link FROM highscores_entries JOIN highscores_players ON highscores_entries.player_id = highscores_players.id WHERE highscore_id = ? AND archived = 0 ORDER BY score DESC;",
+      "SELECT highscores_players.player_name, highscores_entries.score, highscores_entries.video_link FROM highscores_entries JOIN highscores_players ON highscores_entries.player_id = highscores_players.id WHERE highscore_id = ? AND archived = 0 ORDER BY highscores_entries.score DESC;",
     )
     .bind(highscoreId)
     .all();
