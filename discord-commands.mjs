@@ -64,7 +64,7 @@ const SUBMIT_HIGHSCORE = {
         {
           "name": "score",
           "description": "The score you got",
-          "type": 3,
+          "type": 10,
           "required": true
         },
         {
@@ -125,7 +125,7 @@ const SUBMIT_HIGHSCORE = {
         {
           "name": "score",
           "description": "The score you got",
-          "type": 3,
+          "type": 10,
           "required": true
         },
         {
@@ -214,7 +214,7 @@ const SUBMIT_HIGHSCORE = {
         {
           "name": "score",
           "description": "The score you got",
-          "type": 3,
+          "type": 10,
           "required": true
         },
         {

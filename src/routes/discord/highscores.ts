@@ -105,7 +105,7 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
         let videoLink = "";
         let highscoreId = -1;
         let playerName = "";
-        let score = "";
+        let score = -1;
         for (const input of inputs[0].options) {
           if (input.name === "video-link") {
             videoLink = input.value;

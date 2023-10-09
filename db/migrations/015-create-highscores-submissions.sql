@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS highscores_submissions(
   player_name TEXT, -- once the submission is verified, we commit the player name
   submission_id TEXT UNIQUE,
   submission_status INTEGER, -- 0 = awaiting approval, 1 = approved, 2 = rejected
-  score TEXT,
+  score REAL,
   video_link TEXT,
   rejection_reason TEXT
 );

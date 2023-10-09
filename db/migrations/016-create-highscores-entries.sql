@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS highscores_entries(
   id INTEGER PRIMARY KEY autoincrement,
   player_id INTEGER REFERENCES highscores_players(id) NOT NULL,
   highscore_id INTEGER REFERENCES highscores(id) NOT NULL,
-  score TEXT NOT NULL,
+  score REAL NOT NULL,
   video_link TEXT,
   archived INTEGER
 );

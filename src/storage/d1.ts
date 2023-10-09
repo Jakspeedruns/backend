@@ -27,7 +27,7 @@ export async function insertNewHighscoreSubmission(
   highscoreId: number,
   videoLink: string,
   playerName: string,
-  score: string,
+  score: number,
 ): Promise<NewSubmissionResponse | undefined> {
   const submissionInsert = db.prepare(
     "INSERT INTO highscores_submissions (highscore_id, player_name, submission_id, submission_status, score, video_link) VALUES (?, ?, ?, ?, ?, ?);",
@@ -62,7 +62,7 @@ export async function rejectHighscoreSubmission(db: D1Database, submissionId: st
 
 export interface Highscores {
   playerName: string;
-  score: string;
+  score: number;
   videoLink?: string;
 }
 
