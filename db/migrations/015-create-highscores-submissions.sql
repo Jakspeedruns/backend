@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS highscores_submissions(
   submission_status INTEGER, -- 0 = awaiting approval, 1 = approved, 2 = rejected
   score REAL,
   video_link TEXT,
+  timestamp TEXT, --- YYYY-MM-DD
   rejection_reason TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS highscores_submissions_index_submission_id ON highscores_submissions (submission_id);
