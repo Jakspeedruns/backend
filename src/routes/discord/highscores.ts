@@ -53,6 +53,11 @@ function highscoreIdToName(highscoreId: number): string {
   }
 }
 
+function isValidDateFormat(inputString: string) {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  return datePattern.test(inputString);
+}
+
 export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionContext) => {
   // Verify the request
   const signature = request.headers.get("X-Signature-Ed25519");
@@ -106,6 +111,7 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
         let highscoreId = -1;
         let playerName = "";
         let score = -1;
+        let timestamp = "";
         for (const input of inputs[0].options) {
           if (input.name === "video-link") {
             videoLink = input.value;
@@ -115,6 +121,8 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
             playerName = input.value;
           } else if (input.name === "score") {
             score = input.value;
+          } else if (input.name === "date") {
+            timestamp = input.value;
           }
         }
         if (!videoLink.startsWith("https://") && !videoLink.startsWith("http://")) {
@@ -132,8 +140,27 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
             { headers },
           );
         }
+        if (!isValidDateFormat(timestamp)) {
+          return new Response(
+            JSON.stringify({
+              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+              data: {
+                content: `Not a valid date, must be YYYY-MM-DD`,
+                flags: 64,
+              },
+            }),
+            { headers },
+          );
+        }
         // TODO - make sure everything is set
-        const submissionResp = await insertNewHighscoreSubmission(env.DB, highscoreId, videoLink, playerName, score);
+        const submissionResp = await insertNewHighscoreSubmission(
+          env.DB,
+          highscoreId,
+          videoLink,
+          playerName,
+          score,
+          timestamp,
+        );
         // TODO - handle null
         return new Response(
           JSON.stringify({

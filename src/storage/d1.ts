@@ -28,12 +28,13 @@ export async function insertNewHighscoreSubmission(
   videoLink: string,
   playerName: string,
   score: number,
+  timestamp: string,
 ): Promise<NewSubmissionResponse | undefined> {
   const submissionInsert = db.prepare(
-    "INSERT INTO highscores_submissions (highscore_id, player_name, submission_id, submission_status, score, video_link) VALUES (?, ?, ?, ?, ?, ?);",
+    "INSERT INTO highscores_submissions (highscore_id, player_name, submission_id, submission_status, score, video_link, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?);",
   );
   const submissionId = generateUUID();
-  await submissionInsert.bind(highscoreId, playerName, submissionId, 0, score, videoLink).run();
+  await submissionInsert.bind(highscoreId, playerName, submissionId, 0, score, videoLink, timestamp).run();
   // Check if it's a new plyaer
   let playerId = await db
     .prepare("SELECT id FROM highscores_players WHERE player_name = ?;")
@@ -64,12 +65,13 @@ export interface Highscores {
   playerName: string;
   score: number;
   videoLink?: string;
+  timestamp?: string;
 }
 
 export async function getHighscores(db: D1Database, highscoreId: number): Promise<Highscores[]> {
   const rows = await db
     .prepare(
-      "SELECT highscores_players.player_name, highscores_entries.score, highscores_entries.video_link FROM highscores_entries JOIN highscores_players ON highscores_entries.player_id = highscores_players.id WHERE highscore_id = ? AND archived = 0 ORDER BY highscores_entries.score DESC;",
+      "SELECT highscores_players.player_name, highscores_entries.score, highscores_entries.video_link, highscores_entries.timestamp FROM highscores_entries JOIN highscores_players ON highscores_entries.player_id = highscores_players.id WHERE highscore_id = ? AND archived = 0 ORDER BY highscores_entries.score DESC;",
     )
     .bind(highscoreId)
     .all();
@@ -80,6 +82,7 @@ export async function getHighscores(db: D1Database, highscoreId: number): Promis
       playerName: row.player_name,
       score: row.score,
       videoLink: row.video_link,
+      timestamp: row.timestamp,
     });
   });
   return highscores;
@@ -116,10 +119,17 @@ export async function approveHighscoreSubmission(db: D1Database, submissionId: s
   await archiveUpdate.bind(playerId, submissionInfo.highscore_id).run();
   // Finally, insert the new highscore
   const highscoreInsert = db.prepare(
-    "INSERT INTO highscores_entries (player_id, highscore_id, score, video_link, archived) VALUES (?, ?, ?, ?, ?);",
+    "INSERT INTO highscores_entries (player_id, highscore_id, score, video_link, timestamp, archived) VALUES (?, ?, ?, ?, ?, ?);",
   );
   await highscoreInsert
-    .bind(playerId, submissionInfo.highscore_id, submissionInfo.score, submissionInfo.video_link, 0)
+    .bind(
+      playerId,
+      submissionInfo.highscore_id,
+      submissionInfo.score,
+      submissionInfo.video_link,
+      submissionInfo.timestamp,
+      0,
+    )
     .run();
   return "";
 }

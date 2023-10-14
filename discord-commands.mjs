@@ -72,6 +72,12 @@ const SUBMIT_HIGHSCORE = {
           "description": "YouTube or Twitch URL to the video proof",
           "type": 3,
           "required": true
+        },
+        {
+          "name": "date",
+          "description": "The date you got the score, YYYY-MM-DD",
+          "type": 3,
+          "required": true
         }
       ],
     },
@@ -131,6 +137,12 @@ const SUBMIT_HIGHSCORE = {
         {
           "name": "video-link",
           "description": "YouTube or Twitch URL to the video proof",
+          "type": 3,
+          "required": true
+        },
+        {
+          "name": "date",
+          "description": "The date you got the score, YYYY-MM-DD",
           "type": 3,
           "required": true
         }
@@ -220,6 +232,12 @@ const SUBMIT_HIGHSCORE = {
         {
           "name": "video-link",
           "description": "YouTube or Twitch URL to the video proof",
+          "type": 3,
+          "required": true
+        },
+        {
+          "name": "date",
+          "description": "The date you got the score, YYYY-MM-DD",
           "type": 3,
           "required": true
         }
