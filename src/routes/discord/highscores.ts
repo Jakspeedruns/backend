@@ -76,6 +76,18 @@ export const SubmissionHandler = async (request: any, env: Env, ctx: ExecutionCo
   const { type } = data;
   const headers = { "Content-type": "application/json" };
 
+  // TEMP - while people argue about rules
+  return new Response(
+    JSON.stringify({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: `Submissions disabled until rules are finalized and people are happy with them.`,
+        flags: 64,
+      },
+    }),
+    { headers },
+  );
+
   if (type === InteractionType.PING) {
     return new Response(JSON.stringify({ type: InteractionResponseType.PONG }), { headers });
   } else if (type === InteractionType.MODAL_SUBMIT) {
