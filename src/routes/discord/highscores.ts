@@ -33,7 +33,7 @@ function highscoreIdToName(highscoreId: number): string {
     case 14:
       return "Roll Challenge";
     case 15:
-      return "Spargus T flock Game";
+      return "Spargus Turret Game";
     case 16:
       return "Jetboard Challenge";
     case 17:
