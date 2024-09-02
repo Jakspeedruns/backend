@@ -64,3 +64,12 @@ export interface Level {
   levelName: string;
   gameId: string;
 }
+
+export interface VarVal {
+  VariableId: string;
+  VariableName: string;
+  Category: string;
+  ValueId: string;
+  ValueName: string;
+  IsSubcategory: number;
+}

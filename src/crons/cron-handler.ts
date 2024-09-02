@@ -5,8 +5,10 @@ import { insertNewGame
         ,insertPlatform
         ,insertRegion
         ,insertLevel
-        ,insertLeaderboard 
-        ,selectGameCatSRIds} from "../storage/d1";
+        ,insertLeaderboard
+        ,insertRuns
+        ,selectGameCatSRIds
+        ,insertVarVal } from "../storage/d1";
 
 // a difference
 export async function updateSpeedrunRecords(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
@@ -90,7 +92,7 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
   const client = createSpeedrunAPIClient();
 
   // this has red lines but runs well
-  const { leaderboard, players } = await client.getLeaderboard("xkdk4g1m", "5dw8r40d");
+  const { leaderboard, players , varvals } = await client.getLeaderboard("76r3eg46", "q255rn82");
   
   if (players !== undefined) {
     console.log('insert leaderboard players')
@@ -99,6 +101,11 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
 
   if (leaderboard !== undefined) {
     await insertLeaderboard(env.DB, leaderboard);
+  }
+  console.log("------" + varvals)
+  if (varvals !== undefined) {
+    console.log("varvals??------")
+    await insertVarVal(env.DB, varvals);
   }
 
   console.log("TODO updated leaderboard");
@@ -131,9 +138,12 @@ export async function updateRuns(req: any, env: Env, ctx: ExecutionContext): Pro
   const client = createSpeedrunAPIClient();
 
   // also a Simple test with Jak 1
-  const runs = await client.getRuns("xkdk4g1m");
+  const [ runs, players ] = await client.getRuns("xkdk4g1m");
   if (runs !== undefined) {
-    await insertLeaderboard(env.DB, runs);
+    await insertRuns(env.DB, runs);
+  }
+  if (players !== undefined) {
+    await insertRunner(env.DB, players);
   }
 
   console.log("TODO updated runs");

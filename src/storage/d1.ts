@@ -1,5 +1,5 @@
 import { Env, } from "..";
-import { Game, Run, Runner, Platform, Region, Level } from "./models";
+import { Game, Run, Runner, Platform, Region, Level, VarVal } from "./models";
 
 
 export async function batchUpdateSpeedruns(env: Env, something: string) {
@@ -52,7 +52,7 @@ export async function insertRunner(db: D1Database, runners: Runner[]) {
   const runnerInsert = db.prepare("INSERT OR REPLACE INTO Runner (SRId, Name, Guest, Twitch, SRC, RowCreatedDate) VALUES (?, ?, ?, ?, ?, ?);");
 
   for (const runner of runners) {
-    console.log(runner);
+    //console.log(runner);
     let timestamp = new Date(Date.now())
     batches.push(runnerInsert.bind(runner.SRId, runner.name, runner.guest, runner.twitch, runner.SRC, timestamp.toISOString() ));
   }
@@ -117,5 +117,41 @@ export async function insertLeaderboard(db: D1Database, leaderboard: Run[]) {
   }
   console.log('batched inserts for leaderboard runs');
   //console.log(batches);
+  await db.batch(batches);
+}
+
+//identical to insertLeaderboard for now
+export async function insertRuns(db: D1Database, leaderboard: Run[]) {
+  const batches: D1PreparedStatement[] = [];
+  const runsInsert = db.prepare("INSERT INTO Runs \
+  (SRId, GameId, LevelId, CategoryId, time, timeSecs, platformId, emulated, regionId, \
+    videoLink, comment, submitDate, status, examiner, verifyDate, variables, RowCreatedDate) \
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+
+  // Iterate categories
+  for (const run of leaderboard) {
+    //console.log(run);
+    let timestamp = new Date(Date.now())
+    batches.push(runsInsert.bind(run.SRId, run.gameId, run.levelId, run.categoryId, run.time, 
+      run.timeSecs, run.platformId, run.emulated, run.regionId, run.videoLink, run.comment, 
+      run.submitDate, run.status, run.examiner, run.verifyDate, run.variables, timestamp.toISOString()));
+  }
+  console.log('batched inserts for leaderboard runs');
+  //console.log(batches);
+  await db.batch(batches);
+}
+
+
+
+export async function insertVarVal(db: D1Database, varvals: VarVal[]) {
+  const batches: D1PreparedStatement[] = [];
+  const varvalInsert = db.prepare("INSERT INTO VarVal (  VariableId, VariableName, Category, \
+    ValueId, ValueName, IsSubcategory ) VALUES (?, ?, ?, ?, ?, ?);");
+
+  for (const varval of varvals) {
+    console.log(varval);
+    batches.push(varvalInsert.bind(varval.VariableId, varval.VariableName, varval.Category,
+      varval.ValueId, varval.ValueName, varval.IsSubcategory));
+  }
   await db.batch(batches);
 }

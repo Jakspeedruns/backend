@@ -1,5 +1,5 @@
 import { time } from "console";
-import { Game, Run, Runner, Platform, Region, Level } from "../storage/models";
+import { Game, Run, Runner, Platform, Region, Level, VarVal } from "../storage/models";
 
 function makeTimeString(date: Date) {
   let hours = date.getUTCHours().toString()
@@ -103,8 +103,8 @@ class SRCApi {
   }
 
   async getLeaderboard(gameId: string, categoryId: string) {
-    // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d?embed=players
-    const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}?embed=players`);
+    // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d?embed=players,variables
+    const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}?embed=players,variables`);
     if (resp.status !== 200) {
       return undefined;
     }
@@ -133,7 +133,7 @@ class SRCApi {
         };
         //set the things that can be null
         if (run.run.videos !== null) {
-          if (run.videos.links !== undefined) { //needs undefined specifically
+          if (run.run.videos.links !== null) { //needs undefined specifically
             arun.videoLink = run.run.videos.links[0].uri; //currently only first video
           }
         }
@@ -178,8 +178,31 @@ class SRCApi {
         //add to list
         players.push(runner);
       }
+      //fetch variables per leaderboard
+      let varvals: VarVal[] = [];
+      for (const variable of respData.data.variables.data) {
+        for (const [key, value] of Object.entries(variable.values.values)) {
+          
+          let varval = {
+            VariableId: variable.id,
+            VariableName: variable.name,
+            Category: variable.category,
+            ValueId: '',
+            ValueName: '',
+            IsSubcategory: variable['is-subcategory'] * 1,
+          };
 
-      return { leaderboard , players };
+          console.log( key + value )
+          varval.ValueId = key;
+          varval.ValueName = value.label; //this part probably needs some check on key/value
+          console.log(varval.ValueId + varval.ValueName);
+
+          varvals.push(varval);
+        }
+
+      }
+
+      return { leaderboard , players , varvals };
   }
 
   async getPlatform(gameId: string) {
@@ -240,13 +263,14 @@ class SRCApi {
     // https://www.speedrun.com/api/v1/runs?game=xkdk4g1m&max=200&offset=0
     // https://www.speedrun.com/api/v1/runs?game=xkdk4g1m&max=200&offset=3000
     // &embed=players probably get players here
-    const resp = await fetch(`https://www.speedrun.com/api/v1/runs?game=${gameId}&max=200&offset=${offset}`);
+    const resp = await fetch(`https://www.speedrun.com/api/v1/runs?game=${gameId}&max=200&offset=${offset}&embed=players`);
     if (resp.status !== 200) {
       return undefined;
     }
     const respData: any = await resp.json();
     //one page of runs
     let runlist: Run[] = [];
+    let playerlist: Runner[] = [];
       for (const run of respData.data) {
         let arun = {
           SRId: run.id,
@@ -283,6 +307,34 @@ class SRCApi {
         //add to list
         runlist.push(arun);
         //console.log(arun.SRId)
+        let runner = {
+              SRId: '',
+              name: '',
+              guest: 0,
+              twitch: '',
+              SRC: '',
+            };
+        for (const player of run.players.data) {
+          if (player.rel === "guest") {
+            //make a fake SRId for guests so that we have a unique field to OR REPLACE with
+            runner.SRId = 'ID' + player.name; 
+            runner.name = player.name;
+            runner.guest = 1;
+            runner.twitch = '';
+            runner.SRC = '';
+          } else if (player.rel === "user") {
+            runner.SRId = player.id;
+            runner.name = player.names.international;
+            runner.guest = 0;
+            if ( player.twitch !== null) {
+              runner.twitch = player.twitch.uri;
+            }
+            runner.SRC = player.weblink;
+          }
+          //add to list
+          playerlist.push(runner);
+          console.log("player" + runner.name)
+        }
       }
 
       //pagination
@@ -293,17 +345,21 @@ class SRCApi {
           if (link.rel == "next") {
             console.log("-----------going deeper--------------")
             console.log("ts:" + Date.now())
-            let test = await this.getRuns(gameId, newOffset);
-            if (test !== undefined) {
-              runlist.push.apply(runlist, test)
+            let [ rl, pl ] = await this.getRuns(gameId, newOffset);
+            //append the results of our deeper call
+            if (rl !== undefined) {
+              runlist.push.apply(runlist, rl)
+              console.log("-----------success--------------")
+            }
+            if (pl !== undefined) {
+              runlist.push.apply(playerlist, pl)
               console.log("-----------success--------------")
             }
           }
         }
       }
-      console.log("-----------success2--------------")
-      console.log(runlist.length)
-    return runlist;
+      console.log("List length:" + runlist.length)
+    return [ runlist, playerlist ];
   }
 
 
