@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS Runner(
         DiscordUser     TEXT,
         Twitch          TEXT,
         SRC             TEXT,
-        RowCreatedDate  TEXT,
+        RowUpdatedDate  TEXT,
         Image           TEXT
         );

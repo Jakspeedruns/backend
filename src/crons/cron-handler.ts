@@ -8,21 +8,26 @@ import { insertNewGame
         ,insertLeaderboard
         ,insertRuns
         ,selectGameCatSRIds
-        ,insertVarVal } from "../storage/d1";
+        ,insertVarVal 
+        ,updateRunnerIdsFromSrcId
+        ,checkRunsSrcId
+        ,checkRunnersSrcId
+        ,updateRunsSrcId
+        ,updateRunnerSrcId
+        } from "../storage/d1";
+import { Game, Run, Runner, Platform, Region, Level, VarVal } from "../storage/models";
 
-// a difference
-export async function updateSpeedrunRecords(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
-  // Create a Speedrun.com API client
+
+//makes a table for game, level, category, platform, and region
+export async function fetchGameInfo(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
   const client = createSpeedrunAPIClient();
-
-  // Do something with it
-  // TODO Simple test with Jak 1
-  const game = await client.getGameInfo("xkdk4g1m");
+  // Simple test with Jak 1
+  const game = await client.getGameInfo("ok6qlo1g");
   if (game !== undefined) {
     await insertNewGame(env.DB, game);
   }
 
-  console.log("TODO updated speedrun records");
+  console.log("finished fetchGameInfo");
 
   return;
 }
@@ -37,7 +42,7 @@ export async function updateGamePlatforms(req: any, env: Env, ctx: ExecutionCont
     await insertPlatform(env.DB, plats);
   }
 
-  console.log("TODO updated platforms");
+  console.log("updated platforms");
 
   return;
 }
@@ -52,7 +57,7 @@ export async function updateGameRegions(req: any, env: Env, ctx: ExecutionContex
     await insertRegion(env.DB, regs);
   }
 
-  console.log("TODO updated regions");
+  console.log("updated regions");
 
   return;
 }
@@ -67,7 +72,7 @@ export async function updateGameLevel(req: any, env: Env, ctx: ExecutionContext)
     await insertLevel(env.DB, levs);
   }
 
-  console.log("TODO updated level");
+  console.log("updated level");
 
   return;
 }
@@ -108,7 +113,7 @@ export async function updateLeaderboard(req: any, env: Env, ctx: ExecutionContex
     await insertVarVal(env.DB, varvals);
   }
 
-  console.log("TODO updated leaderboard");
+  console.log("updated leaderboard");
 
   return;
 }
@@ -146,7 +151,83 @@ export async function updateRuns(req: any, env: Env, ctx: ExecutionContext): Pro
     await insertRunner(env.DB, players);
   }
 
-  console.log("TODO updated runs");
+  console.log("inserted Jak1 runs");
+
+  return;
+}
+
+
+
+export async function updateRecentRuns(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
+  // Create a Speedrun.com API client
+  const client = createSpeedrunAPIClient();
+  const [ apiRuns, apiPlayers ] = await client.getRecentRuns("xkdk4g1m");
+
+  //get the SR ids and check our DB
+  let ids = apiRuns.map(obj => obj.SRId)
+  let rows = await checkRunsSrcId(env.DB, ids)
+
+  let runUpdateList: Run[] = []
+  let runInsertList: Run[] = []
+  
+  //if we find a match, update the row, otherwise insert the new run
+  if (rows !== undefined) {
+    for (const apiRun of apiRuns) {
+      const match = rows.find(row => row.SRId == apiRun.SRId)
+      if (match !== undefined) {
+        runUpdateList.push(apiRun)
+      }
+      else {
+        runInsertList.push(apiRun)
+      }
+    }
+    console.log("run update list:" + runUpdateList.length)
+    if (runUpdateList.length > 0) {
+      await updateRunsSrcId(env.DB, runUpdateList);
+    }
+    console.log("run insert list:" + runInsertList.length)
+    if (runInsertList.length > 0) {
+      await insertRuns(env.DB, runInsertList);
+    }
+  }
+  //repeat for players
+  ids = apiPlayers.map(obj => obj.SRId)
+  rows = await checkRunnersSrcId(env.DB, ids)
+  
+  let runnerUpdateList: Runner[] = []
+  let runnerInsertList: Runner[] = []
+
+  if (rows !== undefined) {
+    for (const apiPlayer of apiPlayers) {
+      const match = rows.find(row => row.SRId == apiPlayer.SRId)
+      if (match !== undefined) {
+        runnerUpdateList.push(apiPlayer)
+      }
+      else {
+        runnerInsertList.push(apiPlayer)
+      }
+    }
+    console.log("runner update list:" + runnerUpdateList.length)
+    if (runnerUpdateList.length > 0) {
+      await updateRunnerSrcId(env.DB, runnerUpdateList);
+    }
+    console.log("runner insert list:" + runnerInsertList.length)
+    if (runnerInsertList.length > 0) {
+      await insertRunner(env.DB, runnerInsertList);
+    }
+  }
+  console.log("inserted recent runs and players");
+  return;
+}
+
+
+
+//this checks the entire runs table for any NULL RunnerId and grabs our Runner.Id based on SrcId
+export async function bulkRunnerIdUpdater(req: any, env: Env, ctx: ExecutionContext): Promise<any> {
+  // Create a Speedrun.com API client
+  const client = createSpeedrunAPIClient();
+ 
+  await updateRunnerIdsFromSrcId(env.DB);
 
   return;
 }

@@ -13,6 +13,7 @@ export interface Game {
   platforms: Platform[];
   regions: Region[];
   levels: Level[];
+  varvals: VarVal[];
 }
 
 export interface Run {
@@ -20,6 +21,8 @@ export interface Run {
   gameId: string;
   levelId: string;
   categoryId: string;
+  runnerId: number;
+  runnerSrcId: string;
   time: string;
   timeSecs: number;
   platformId: string;
@@ -62,13 +65,13 @@ export interface Version {
 export interface Level {
   srcId: string;
   levelName: string;
-  gameId: string;
+  gameSrcId: string;
 }
 
 export interface VarVal {
   VariableId: string;
   VariableName: string;
-  Category: string;
+  CategorySrcId: string;
   ValueId: string;
   ValueName: string;
   IsSubcategory: number;

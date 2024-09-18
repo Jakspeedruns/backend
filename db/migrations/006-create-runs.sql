@@ -1,12 +1,14 @@
 CREATE TABLE IF NOT EXISTS Runs(
     RunId          INTEGER PRIMARY KEY autoincrement,
     SRId           TEXT UNIQUE,
-    GameId         INTEGER,
+    GameId         TEXT,
     LevelId        TEXT,
-    CategoryId     INTEGER,
+    CategoryId     TEXT,
+    RunnerId       INTEGER,
+    RunnerSrcId    TEXT,
     Time           TEXT,
     TimeSecs       REAL,
-    PlatformId     INTEGER REFERENCES Platform(SRId),
+    PlatformId     TEXT REFERENCES Platform(SRId),
     Emulated       INTEGER,
     RegionId       TEXT REFERENCES Region(SRId),
     VideoLink      TEXT,
@@ -15,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Runs(
     Status         TEXT,
     Examiner       TEXT,
     VerifyDate     TEXT,
-    RowCreatedDate TEXT,
+    RowUpdatedDate TEXT,
     AlgPoint       INTEGER,
     Variables      TEXT
     );

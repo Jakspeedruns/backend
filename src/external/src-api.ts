@@ -14,12 +14,12 @@ function makeTimeString(date: Date) {
     hours = '';
   }
   if (minutes != '0') {
-    minutes = minutes + 'm ';
+    minutes = minutes.padStart(2, '0') + 'm ';
   } else {
     minutes = '';
   }
   if (seconds != '0') {
-    seconds = seconds + 's';
+    seconds = seconds.padStart(2, '0') + 's';
   } else {
     seconds = '';
   }
@@ -35,9 +35,10 @@ function makeTimeString(date: Date) {
 }
 
 class SRCApi {
+  //gets the info needed to set up a table for game, level, category, platform, region, and variables
   async getGameInfo(gameId: string): Promise<Game | undefined> {
-    // https://www.speedrun.com/api/v1/games/xkdk4g1m?embed=categories,platforms,regions,levels
-    const resp = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}?embed=categories,platforms,regions,levels`);
+    // https://www.speedrun.com/api/v1/games/xkdk4g1m?embed=categories,platforms,regions,levels,variables
+    const resp = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}?embed=categories,platforms,regions,levels,variables`);
     if (resp.status !== 200) {
       return undefined;
     }
@@ -49,7 +50,8 @@ class SRCApi {
       categories: [],
       platforms: [],
       regions: [],
-      levels: []
+      levels: [],
+      varvals: []
     };
     for (const category of respData.data.categories.data) {
       let cat = {
@@ -80,8 +82,29 @@ class SRCApi {
       newGame.levels.push({
         srcId: lev.id,
         levelName: lev.name,
-        gameId: gameId  //weird lol
+        gameSrcId: gameId
       });
+    }
+    for (const variable of respData.data.variables.data) {
+      for (const [key, value] of Object.entries(variable.values.values)) {
+        
+        let varval = {
+          VariableId: variable.id,
+          VariableName: variable.name,
+          CategorySrcId: variable.category,
+          ValueId: '',
+          ValueName: '',
+          IsSubcategory: variable['is-subcategory'] * 1,
+        };
+
+        console.log( key + value )
+        varval.ValueId = key;
+        varval.ValueName = value.label; //this part probably needs some check on key/value
+        console.log(varval.ValueId + varval.ValueName);
+
+        newGame.varvals.push(varval);
+      }
+
     }
     return newGame;
   }
@@ -102,6 +125,7 @@ class SRCApi {
     return gameList;
   }
 
+  //getting only a leaderboard is kinda meh. 
   async getLeaderboard(gameId: string, categoryId: string) {
     // https://www.speedrun.com/api/v1/leaderboards/xkdk4g1m/category/5dw8r40d?embed=players,variables
     const resp = await fetch(`https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${categoryId}?embed=players,variables`);
@@ -118,6 +142,8 @@ class SRCApi {
           gameId: run.run.game,
           levelId: run.run.level,
           categoryId: run.run.category,
+          runnerId: 0,
+          runnerSrcId: '',
           time: '',
           timeSecs: run.run.times.primary_t,
           platformId: run.run.system.platform,
@@ -133,7 +159,7 @@ class SRCApi {
         };
         //set the things that can be null
         if (run.run.videos !== null) {
-          if (run.run.videos.links !== null) { //needs undefined specifically
+          if (run.run.videos.links !== null) {
             arun.videoLink = run.run.videos.links[0].uri; //currently only first video
           }
         }
@@ -141,6 +167,15 @@ class SRCApi {
           arun.status = run.run.status.status;
           arun.examiner = run.run.status.examiner;
           arun.verifyDate = run.run.status["verify-date"];
+        }
+        console.log(run.run.players)
+        console.log("--")
+        for (const player of run.run.players) {
+          if (player.rel === "guest") {
+            arun.runnerSrcId = 'ID' + player.name; 
+          } else if (player.rel === "user") {
+            arun.runnerSrcId = player.id;
+          }
         }
         //time stuff
         let dateObj = new Date(arun.timeSecs * 1000)        
@@ -178,6 +213,8 @@ class SRCApi {
         //add to list
         players.push(runner);
       }
+      let playerset = new Set(players)  //making a set deduplicates
+      players = [...playerset]      //the spread operator "..." spreads the values into the array 
       //fetch variables per leaderboard
       let varvals: VarVal[] = [];
       for (const variable of respData.data.variables.data) {
@@ -186,7 +223,8 @@ class SRCApi {
           let varval = {
             VariableId: variable.id,
             VariableName: variable.name,
-            Category: variable.category,
+            GameId: 0,
+            CategorySrcId: variable.category,
             ValueId: '',
             ValueName: '',
             IsSubcategory: variable['is-subcategory'] * 1,
@@ -205,6 +243,7 @@ class SRCApi {
       return { leaderboard , players , varvals };
   }
 
+  //I think these are old since they're hanlded in fetchGameinfo
   async getPlatform(gameId: string) {
     // https://www.speedrun.com/api/v1/games/xkdk4g1m?embed=platforms
     const resp = await fetch(`https://www.speedrun.com/api/v1/games/${gameId}?embed=platforms`);
@@ -253,7 +292,7 @@ class SRCApi {
       levs.push({
         srcId: lev.id,
         levelName: lev.name,
-        gameId: gameId  //weird lol
+        gameSrcId: gameId  
       });
     }
     return levs;
@@ -277,6 +316,8 @@ class SRCApi {
           gameId: run.game,
           levelId: run.level,
           categoryId: run.category,
+          runnerId: 0,
+          runnerSrcId: '',
           time: '',
           timeSecs: run.times.primary_t,
           platformId: run.system.platform,
@@ -301,12 +342,21 @@ class SRCApi {
           arun.examiner = run.status.examiner;
           arun.verifyDate = run.status["verify-date"];
         }
+        //runnersrcid
+        for (const player of run.players.data) {
+          if (player.rel === "guest") {
+            arun.runnerSrcId = 'ID' + player.name; 
+          } else if (player.rel === "user") {
+            arun.runnerSrcId = player.id;
+          }
+        }
         //time stuff
         let dateObj = new Date(arun.timeSecs * 1000)        
         arun.time = makeTimeString(dateObj);
         //add to list
         runlist.push(arun);
         //console.log(arun.SRId)
+        //runner stuff
         let runner = {
               SRId: '',
               name: '',
@@ -316,7 +366,7 @@ class SRCApi {
             };
         for (const player of run.players.data) {
           if (player.rel === "guest") {
-            //make a fake SRId for guests so that we have a unique field to OR REPLACE with
+            //make a fake SRId for guests so that we have a unique field to OR IGNORE with
             runner.SRId = 'ID' + player.name; 
             runner.name = player.name;
             runner.guest = 1;
@@ -333,12 +383,12 @@ class SRCApi {
           }
           //add to list
           playerlist.push(runner);
-          console.log("player" + runner.name)
+          //console.log("player: " + runner.name)
         }
       }
-
+      console.log("offset:" + offset)
       //pagination
-      //they give a link but eh
+      //they give a link but lets build our own
       if (respData.pagination !== null) {
         let newOffset = respData.pagination.size + respData.pagination.offset
         for (const link of respData.pagination.links) {
@@ -358,14 +408,110 @@ class SRCApi {
           }
         }
       }
-      console.log("List length:" + runlist.length)
+
+    let playerset = new Set(playerlist)  //making a set deduplicates
+    playerlist = [...playerset]      //the spread operator "..." spreads the values into the array 
+
+    console.log("List length:" + runlist.length)
     return [ runlist, playerlist ];
   }
 
+  //basically a copy of getRuns, api call sorted for recent
+  async getRecentRuns(gameId: string) {
+    // https://www.speedrun.com/api/v1/runs?game=xkdk4g1m&max=200&orderby=submitted&direction=desc
+    // &embed=players probably get players here
+    const resp = await fetch(`https://www.speedrun.com/api/v1/runs?game=${gameId}&max=200&embed=players&orderby=submitted&direction=desc`);
+    if (resp.status !== 200) {
+      return undefined;
+    }
+    const respData: any = await resp.json();
+    //one page of runs
+    let runlist: Run[] = [];
+    let playerlist: Runner[] = [];
+      for (const run of respData.data) {
+        let arun = {
+          SRId: run.id,
+          gameId: run.game,
+          levelId: run.level,
+          categoryId: run.category,
+          runnerId: 0,
+          runnerSrcId: '',
+          time: '',
+          timeSecs: run.times.primary_t,
+          platformId: run.system.platform,
+          emulated: run.system.emulated * 1, //converts t/f to 1/0
+          regionId: run.system.region,
+          videoLink: '',
+          comment: run.comment,
+          submitDate: run.submitted,
+          status: '',
+          examiner: '',
+          verifyDate: '',
+          variables: JSON.stringify(run.values),
+        };
+        //set the things that can be null
+        if (run.videos !== null) {
+          if (run.videos.links !== undefined) { //needs undefined specifically
+            arun.videoLink = run.videos.links[0].uri; //currently only first video
+          }
+        }
+        if (run.status !== null) {
+          arun.status = run.status.status;
+          arun.examiner = run.status.examiner;
+          arun.verifyDate = run.status["verify-date"];
+        }
+        //runnersrcid
+        for (const player of run.players.data) {
+          if (player.rel === "guest") {
+            arun.runnerSrcId = 'ID' + player.name; 
+          } else if (player.rel === "user") {
+            arun.runnerSrcId = player.id;
+          }
+        }
+        //time stuff
+        let dateObj = new Date(arun.timeSecs * 1000)        
+        arun.time = makeTimeString(dateObj);
+        //add to list
+        runlist.push(arun);
+        //console.log(arun.SRId)
+        //runner stuff
+        let runner = {
+              SRId: '',
+              name: '',
+              guest: 0,
+              twitch: '',
+              SRC: '',
+            };
+        for (const player of run.players.data) {
+          if (player.rel === "guest") {
+            //make a fake SRId for guests so that we have a unique field to OR IGNORE with
+            runner.SRId = 'ID' + player.name; 
+            runner.name = player.name;
+            runner.guest = 1;
+            runner.twitch = '';
+            runner.SRC = '';
+          } else if (player.rel === "user") {
+            runner.SRId = player.id;
+            runner.name = player.names.international;
+            runner.guest = 0;
+            if ( player.twitch !== null) {
+              runner.twitch = player.twitch.uri;
+            }
+            runner.SRC = player.weblink;
+          }
+          //add to list
+          playerlist.push(runner);
+          //console.log("player: " + runner.name)
+        }
+      }
+
+    let playerset = new Set(playerlist)  //making a set deduplicates
+    playerlist = [...playerset]      //the spread operator "..." spreads the values into the array 
+    
+    return [ runlist, playerlist ];
+  }
 
 }
-
-
 
 export function createSpeedrunAPIClient(): SRCApi {
   return new SRCApi();

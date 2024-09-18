@@ -2,5 +2,6 @@ CREATE TABLE IF NOT EXISTS Level(
         id           INTEGER PRIMARY KEY autoincrement,
         SRId         TEXT UNIQUE,
         LevelName    TEXT,
-        GameId       TEXT
+        GameId       INTEGER,
+        GameSrcId    TEXT
         );
