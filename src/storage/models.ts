@@ -3,6 +3,8 @@ export interface Category {
   CatName: string;
   IL: number;
   Misc: number;
+  CatExt: number;
+  Diff: number;
 }
 
 export interface Game {
