@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS Category(
         SRId TEXT UNIQUE,
         CatName TEXT,
         IL INTEGER,
-        Misc INTEGER
+        Misc INTEGER,
+        CatExt INTEGER,
+        Diff INTEGER
 );

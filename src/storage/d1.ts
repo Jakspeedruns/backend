@@ -147,14 +147,14 @@ export async function insertNewGame(db: D1Database, game: Game) {
   // For now we have to split them up and bite the bullet on no transactions
   const batches: D1PreparedStatement[] = [];
   const gameInsert = db.prepare("INSERT INTO Games (SRId, GameName, ShortName) VALUES (?, ?, ?) RETURNING id;");
-  const categoryInsert = db.prepare("INSERT INTO Category (GameID, SRId, CatName, IL, Misc) VALUES (?, ?, ?, ?, ?);");
+  const categoryInsert = db.prepare("INSERT INTO Category (GameID, SRId, CatName, IL, Misc, CatExt, Diff) VALUES (?, ?, ?, ?, ?, ?, ?);");
 
   const lastRowId = await gameInsert.bind(game.srcId, game.gameName, game.shortName).first("id");
 
   // Iterate categories
   for (const category of game.categories) {
     console.log(category);
-    batches.push(categoryInsert.bind(lastRowId, category.SRId, category.CatName, category.IL, category.Misc));
+    batches.push(categoryInsert.bind(lastRowId, category.SRId, category.CatName, category.IL, category.Misc, category.CatExt, category.Diff));
   }
   await db.batch(batches);
 }

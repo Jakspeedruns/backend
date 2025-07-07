@@ -20,6 +20,8 @@ class SRCApi {
         CatName: category.name,
         IL: 0, // TODO - this requires a different lookup, tbh levels should probably be their own table for that reason
         Misc: category.miscellaneous === true ? 1 : 0,
+        CatExt: 0, // Needs updating
+        Diff: 1, //Needs updating
       });
     }
     return newGame;
