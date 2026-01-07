@@ -41,7 +41,7 @@ insert or ignore into `highscores_players` (`id`, `player_name`) values (19, 'hs
 insert or ignore into `highscores_players` (`id`, `player_name`) values (20, 'USneakyTurtle');
 insert or ignore into `highscores_players` (`id`, `player_name`) values (21, 'Powercell Zeke');
 insert or ignore into `highscores_players` (`id`, `player_name`) values (22, 'JayVondy');
-insert or ignore into `highscores_players` (`id`, `player_name`) values (23, 'GScatcher');
+insert or ignore into `highscores_players` (`id`, `player_name`) values (23, 'G3catcher');
 insert or ignore into `highscores_players` (`id`, `player_name`) values (24, 'DarkEcoDemon');
 insert or ignore into `highscores_players` (`id`, `player_name`) values (25, 'Azure210');
 insert or ignore into `highscores_players` (`id`, `player_name`) values (26, 'CalebTheSpeedRunner');
