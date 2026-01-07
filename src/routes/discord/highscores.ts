@@ -6,6 +6,8 @@ function highscoreIdToName(highscoreId: number): string {
   switch (highscoreId) {
     case 1:
       return "Fish";
+    case 23:
+      return "Cratetopia";
     case 2:
       return "Scatter Gun Course";
     case 3:
